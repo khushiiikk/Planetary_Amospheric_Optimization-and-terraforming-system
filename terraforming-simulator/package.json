@@ -1,0 +1,10 @@
+{
+  "name": "planet-terraforming-simulator",
+  "version": "1.2.0",
+  "description": "Premium Mars climate physics & AI optimization suite",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js"
+  },
+  "dependencies": {}
+}

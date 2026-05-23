@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planet Terraforming Simulator 🌍</title>
+  <!-- Google Fonts for premium sci-fi tech feel -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Deep Space Ambient Background Canvas (animated stars) -->
+  <canvas id="stars-background"></canvas>
+
+  <div class="app-container">
+    <!-- Header Control Bar -->
+    <header class="app-header">
+      <div class="brand">
+        <h1>TERRAFORM_OS <span class="version">v1.2.0</span></h1>
+        <p class="subtitle">Mars Climate Physics & AI Optimization Suite</p>
+      </div>
+      <div class="global-telemetry">
+        <div class="telemetry-item">
+          <span class="label">SIMULATION TIME</span>
+          <span class="value" id="time-display">0 Years</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="label">FUNDS REMAINING</span>
+          <span class="value budget-value" id="budget-display">M$ 10,000</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="label">SYSTEM RATE</span>
+          <span class="value" id="rate-display">Idle</span>
+        </div>
+      </div>
+      <div class="simulation-actions">
+        <button id="btn-play" class="action-btn active" title="Start Simulation">PLAY</button>
+        <button id="btn-pause" class="action-btn" title="Pause Simulation">PAUSE</button>
+        <button id="btn-reset" class="action-btn reset" title="Reset Simulation">RESET</button>
+        <div class="speed-selector">
+          <label for="select-speed">SPEED</label>
+          <select id="select-speed">
+            <option value="1">1x (Slow)</option>
+            <option value="5" selected>5x (Normal)</option>
+            <option value="20">20x (Fast)</option>
+            <option value="100">100x (Hyper)</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace Dashboard Grid -->
+    <main class="dashboard-grid">
+      <!-- Left Panel: Planetary Status HUD -->
+      <section class="panel glass-panel left-panel" id="hud-panel">
+        <div class="panel-header">
+          <h2>PLANETARY HUD</h2>
+          <div class="status-indicator online">TELEMETRY SECURE</div>
+        </div>
+        
+        <div class="hud-metrics">
+          <!-- Population Survival Index Card -->
+          <div class="metric-card main-metric-card">
+            <div class="metric-radial">
+              <svg viewBox="0 0 100 100" class="radial-ring">
+                <circle cx="50" cy="50" r="40" class="ring-bg"></circle>
+                <circle cx="50" cy="50" r="40" class="ring-fg" id="ring-survival" stroke-dasharray="251.2" stroke-dashoffset="251.2"></circle>
+              </svg>
+              <div class="radial-center">
+                <span class="value" id="val-survival">0%</span>
+              </div>
+            </div>
+            <div class="metric-label">
+              <h3>SURVIVAL INDEX</h3>
+              <p>Habitability Index for Human Colony</p>
+            </div>
+          </div>
+
+          <!-- Individual Atmospheric Stat Cards -->
+          <div class="metric-grid-2x2">
+            <!-- Oxygen Card -->
+            <div class="metric-card oxygen-accent">
+              <div class="metric-header-inline">
+                <span class="metric-icon">🟢</span>
+                <span class="metric-label-small">OXYGEN LEVEL</span>
+              </div>
+              <div class="metric-number-display">
+                <span class="value" id="val-oxygen">0.13%</span>
+                <span class="target-marker" title="Target: 21%">/ 21% Target</span>
+              </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="bar-oxygen" style="width: 0.6%"></div>
+              </div>
+              <div class="telemetry-sub">Pressure: <span id="val-oxygen-partial">0.00</span> atm</div>
+            </div>
+
+            <!-- Temperature Card -->
+            <div class="metric-card temp-accent">
+              <div class="metric-header-inline">
+                <span class="metric-icon">🔴</span>
+                <span class="metric-label-small">AVG TEMP</span>
+              </div>
+              <div class="metric-number-display">
+                <span class="value" id="val-temp">-63.0°C</span>
+                <span class="target-marker" title="Target: 15°C">/ 15°C Target</span>
+              </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="bar-temp" style="width: 18%"></div>
+              </div>
+              <div class="telemetry-sub">Albedo: <span id="val-albedo">0.25</span></div>
+            </div>
+
+            <!-- Water Card -->
+            <div class="metric-card water-accent">
+              <div class="metric-header-inline">
+                <span class="metric-icon">🔵</span>
+                <span class="metric-label-small">WATER COVER</span>
+              </div>
+              <div class="metric-number-display">
+                <span class="value" id="val-water">0.0%</span>
+                <span class="target-marker" title="Target: 60%">/ 60% Target</span>
+              </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="bar-water" style="width: 0%"></div>
+              </div>
+              <div class="telemetry-sub">Ice Caps: <span id="val-ice">15.0</span>% | Vapor: <span id="val-vapor">0.0</span>%</div>
+            </div>
+
+            <!-- Pressure Card -->
+            <div class="metric-card pressure-accent">
+              <div class="metric-header-inline">
+                <span class="metric-icon">🟡</span>
+                <span class="metric-label-small">ATM PRESSURE</span>
+              </div>
+              <div class="metric-number-display">
+                <span class="value" id="val-pressure">0.01 atm</span>
+                <span class="target-marker" title="Target: 1.0 atm">/ 1.0 atm Target</span>
+              </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="bar-pressure" style="width: 1%"></div>
+              </div>
+              <div class="telemetry-sub">CO₂: <span id="val-co2">95.0</span>% | N₂: <span id="val-nitrogen">2.7</span>%</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Center Panel: Live Planet Canvas Visualizer -->
+      <section class="panel glass-panel center-panel">
+        <div class="panel-header">
+          <h2>PLANETARY VISUALIZATION</h2>
+          <div class="visualizer-options">
+            <span id="planet-status-text">RE-WRITING ATMOSPHERE...</span>
+          </div>
+        </div>
+        
+        <div class="planet-viewport">
+          <!-- Canvas for procedural 3D sphere render using Mars MOLA dataset -->
+          <canvas id="planet-canvas" width="450" height="450"></canvas>
+          
+          <!-- Holographic grid rings for aesthetic premium touch -->
+          <div class="holo-ring outer"></div>
+          <div class="holo-ring inner"></div>
+          
+          <!-- Overlay HUD readings directly on the planet view -->
+          <div class="planet-overlay-readout top-left">
+            <div class="label">TARGET COORD: 18.85°N, 227.6°E</div>
+            <div class="value">GALE CRATER</div>
+          </div>
+          <div class="planet-overlay-readout bottom-right">
+            <div class="label">VISUAL MODEL</div>
+            <div class="value" id="visual-mode-label">REAL MOLA TOPOGRAPHY</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Panel: Command Center (Manual Controls & AI Agent) -->
+      <section class="panel glass-panel right-panel">
+        <div class="panel-header">
+          <h2>COMMAND CENTER</h2>
+          <div class="tabs">
+            <button class="tab-btn active" id="tab-manual">MANUAL CONTROL</button>
+            <button class="tab-btn" id="tab-ai">AI OPTIMIZER</button>
+          </div>
+        </div>
+
+        <div class="command-content">
+          <!-- Tab 1: Manual Controls -->
+          <div class="tab-content active" id="content-manual">
+            <div class="control-scroll">
+              <!-- Greenhouse Gas slider -->
+              <div class="control-group">
+                <div class="control-header">
+                  <span class="control-title">CO₂ EMISSIONS (Greenhouse Generators)</span>
+                  <span class="control-value" id="lbl-ctrl-co2">0.0 kg/s</span>
+                </div>
+                <input type="range" id="ctrl-co2" min="0" max="100" value="0" class="slider slider-co2">
+                <div class="control-meta">
+                  <span>Raises Temp & Pressure</span>
+                  <span class="cost-indicator">Cost: M$ 15/s</span>
+                </div>
+              </div>
+
+              <!-- Comet impact rate slider -->
+              <div class="control-group">
+                <div class="control-header">
+                  <span class="control-title">COMET IMPACT RATE (Water Injector)</span>
+                  <span class="control-value" id="lbl-ctrl-comets">0.0 / yr</span>
+                </div>
+                <input type="range" id="ctrl-comets" min="0" max="10" step="0.1" value="0" class="slider slider-water">
+                <div class="control-meta">
+                  <span>Adds Water & Heat, lowers Albedo</span>
+                  <span class="cost-indicator">Cost: M$ 180 / comet</span>
+                </div>
+              </div>
+
+              <!-- Bacteria/Algae seeding slider -->
+              <div class="control-group">
+                <div class="control-header">
+                  <span class="control-title">CYANOBACTERIA SEEDING (O₂ Release)</span>
+                  <span class="control-value" id="lbl-ctrl-algae">0.0% coverage</span>
+                </div>
+                <input type="range" id="ctrl-algae" min="0" max="100" value="0" class="slider slider-oxygen">
+                <div class="control-meta">
+                  <span>Converts CO₂ into O₂. Consumes liquid water.</span>
+                  <span class="cost-indicator">Cost: M$ 8/s</span>
+                </div>
+              </div>
+
+              <!-- Atmospheric Scrubbers slider -->
+              <div class="control-group">
+                <div class="control-header">
+                  <span class="control-title">ATMOSPHERIC SCRUBBERS (Toxic Removal)</span>
+                  <span class="control-value" id="lbl-ctrl-scrubbers">0.0 units</span>
+                </div>
+                <input type="range" id="ctrl-scrubbers" min="0" max="100" value="0" class="slider slider-scrub">
+                <div class="control-meta">
+                  <span>Scrubs atmosphere, reduces extreme pressures</span>
+                  <span class="cost-indicator">Cost: M$ 12/s</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Emergency Actions -->
+            <div class="control-buttons-panel">
+              <button class="emergency-btn" id="btn-comet-strike">TRIGGER INSTANT COMET STRIKE (M$ 250)</button>
+              <button class="emergency-btn secondary" id="btn-algae-bomb">DEPLOY N-NUTRIENT ALGAE BOMB (M$ 400)</button>
+            </div>
+          </div>
+
+          <!-- Tab 2: AI Optimizer Config -->
+          <div class="tab-content" id="content-ai">
+            <div class="ai-config-grid">
+              <div class="input-row">
+                <label for="ai-strategy">OPTIMIZATION AGENT</label>
+                <select id="ai-strategy">
+                  <option value="hill-climbing">Heuristic Hill Climbing (Greedy Ascent)</option>
+                  <option value="genetic-algorithm">Genetic Algorithm (Sequence Evolution)</option>
+                  <option value="reinforcement-learning">Reinforcement Q-Learning Simulator</option>
+                </select>
+              </div>
+
+              <div class="input-row">
+                <label for="ai-weights">TARGET OBJECTIVE WEIGHTS</label>
+                <div class="weights-container">
+                  <div class="weight-item">
+                    <span>SPEED:</span>
+                    <input type="range" id="weight-speed" min="1" max="10" value="7">
+                  </div>
+                  <div class="weight-item">
+                    <span>BUDGET:</span>
+                    <input type="range" id="weight-cost" min="1" max="10" value="4">
+                  </div>
+                  <div class="weight-item">
+                    <span>SAFETY:</span>
+                    <input type="range" id="weight-safety" min="1" max="10" value="5">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ai-trigger-container">
+              <button id="btn-run-ai" class="ai-btn">INITIALIZE AI OPTIMIZATION AGENT</button>
+            </div>
+
+            <!-- AI Telemetry Console Terminal -->
+            <div class="ai-console">
+              <div class="console-header">
+                <div class="dot green"></div>
+                <div class="dot yellow"></div>
+                <div class="dot red"></div>
+                <span class="console-title">AI_AGENT_TELEMETRY.log</span>
+                <span class="console-status" id="console-status-text">OFFLINE</span>
+              </div>
+              <div class="console-logs" id="console-logs">
+                <div class="log-line text-dim">&gt; Terraform Optimization Engine ready.</div>
+                <div class="log-line text-dim">&gt; Select strategy and press INITIALIZE to begin search.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Panel: SVG Timeline Analytics -->
+    <footer class="panel glass-panel bottom-panel">
+      <div class="panel-header">
+        <h2>HISTORICAL TIMELINE TELEMETRY</h2>
+        <div class="chart-legend">
+          <span class="legend-item oxygen"><span class="bullet"></span> Oxygen (%)</span>
+          <span class="legend-item temperature"><span class="bullet"></span> Temp (°C)</span>
+          <span class="legend-item water"><span class="bullet"></span> Water Cover (%)</span>
+          <span class="legend-item survival"><span class="bullet"></span> Survival Index (%)</span>
+        </div>
+      </div>
+      <div class="chart-container" id="chart-parent">
+        <!-- Pure Custom SVG Chart drawn dynamically in JavaScript -->
+        <svg id="history-chart" width="100%" height="180">
+          <!-- Background Grid Lines -->
+          <g id="chart-grid"></g>
+          
+          <!-- Red Target threshold lines for habitability -->
+          <g id="chart-targets"></g>
+          
+          <!-- Metric Polylines -->
+          <path id="path-oxygen" class="chart-path oxygen" d=""></path>
+          <path id="path-temp" class="chart-path temperature" d=""></path>
+          <path id="path-water" class="chart-path water" d=""></path>
+          <path id="path-survival" class="chart-path survival" d=""></path>
+          
+          <!-- Tooltip overlay vertical line -->
+          <line id="chart-hover-line" x1="0" y1="0" x2="0" y2="180" class="hover-line" style="display:none;"></line>
+        </svg>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Physics Engine, AI Solver, and Core Application Controller Scripts -->
+  <script src="simulator.js"></script>
+  <script src="ai-optimizer.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

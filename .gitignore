@@ -1,0 +1,9 @@
+# Ignore local Node packages
+node_modules/
+
+# Ignore system/IDE logs and metadata
+.DS_Store
+Thumbs.db
+
+# Ignore agent tracking file
+AGENT
